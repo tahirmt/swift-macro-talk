@@ -14,11 +14,23 @@ public struct MockMacro: PeerMacro {
         let classDecl = try ClassDeclSyntax(
             "\(raw: protocolDecl.accessPrefix)final class Mock\(protocolDecl.name.trimmed): \(raw: protocolDecl.name.text)"
         ) {
-
+            try StubErrorBuilder().build(from: protocolDecl)
+            try InitBuilder().build(from: protocolDecl)
+            try StubBuilder().build(from: protocolDecl)
+            try SpyBuilder().build(from: protocolDecl)
+            try ConformanceBuilder().build(from: protocolDecl)
         }
 
-        return [
-            DeclSyntax(classDecl)
-        ]
+        let codeblock = CodeBlockItemListSyntax {
+            CodeBlockItemSyntax(item: .decl(DeclSyntax(classDecl)))
+        }
+        let ifClause = IfConfigClauseListSyntax {
+            IfConfigClauseSyntax(
+                poundKeyword: .poundIfToken(),
+                condition: DeclReferenceExprSyntax(baseName: "DEBUG"),
+                elements: .statements(codeblock)
+            )
+        }
+        return [DeclSyntax(IfConfigDeclSyntax(clauses: ifClause))]
     }
 }

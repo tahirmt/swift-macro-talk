@@ -14,6 +14,14 @@ struct StubErrorBuilder: MemberBlockBuilder {
             // enum StubError: Error {
             //   case fetchUser
             // }
+
+            try EnumDeclSyntax("enum StubError: Error") {
+                for function in decl.functions {
+                    """
+                    case \(function.name.trimmed)
+                    """
+                }
+            }
         }
     }
 }
